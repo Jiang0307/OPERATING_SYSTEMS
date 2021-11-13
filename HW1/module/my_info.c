@@ -1,35 +1,4 @@
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/proc_fs.h>
-#include <linux/seq_file.h>
-#include <linux/version.h>
-
-#include <asm/cpu.h>
-#include <asm/cpufeature.h>
-#include <linux/cpufreq.h>
-#include <linux/fs.h>
-#include <linux/init.h>
-#include <linux/utsname.h>
-#include <generated/utsrelease.h>
-
-#include <linux/mm.h>
-#include <linux/hugetlb.h>
-#include <linux/mman.h>
-#include <linux/mmzone.h>
-#include <linux/quicklist.h>
-#include <linux/seq_file.h>
-#include <linux/swap.h>
-#include <linux/vmstat.h>
-#include <linux/atomic.h>
-#include <linux/vmalloc.h>
-#include <linux/cma.h>
-#include <asm/page.h>
-#include <asm/pgtable.h>
-#include <linux/types.h>
-#include <linux/percpu.h>
-#include <linux/vm_event_item.h>
-#include <linux/time.h>
-#include <linux/kernel_stat.h>
+#include "my_info.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -44,13 +13,10 @@ static void show_version_info(struct seq_file *m)
     return;
 }
 
-// This function is called for each "step" of a sequence.
 static int show_cpu_info(struct seq_file *m, void *v)
 {
     struct cpuinfo_x86 *c = v;
     unsigned int cpu;
-
-    //=======================CPU=======================
     cpu = c->cpu_index;
     if (cpu == 0)
     {
@@ -74,11 +40,11 @@ static void show_memory_info(struct seq_file *m)
 {
 #define KB(x) ((x) << (PAGE_SHIFT - 10))
 
-#define si_swapinfo(val)                      \
-       do                                         \
-       {                                          \
-          (val)->freeswap = (val)->totalswap = 0; \
-       } while (0)
+#define si_swapinfo(val)                        \
+    do                                          \
+    {                                           \
+        (val)->freeswap = (val)->totalswap = 0; \
+    } while (0)
 
     struct sysinfo i;
     unsigned long pages[NR_LRU_LISTS];
@@ -105,7 +71,7 @@ static void show_memory_info(struct seq_file *m)
     return;
 }
 
-static void show_time_info(struct seq_file* m)
+static void show_time_info(struct seq_file *m)
 {
     struct timespec uptime;
     struct timespec idle;
@@ -115,7 +81,7 @@ static void show_time_info(struct seq_file* m)
 
     nsec = 0;
     for_each_possible_cpu(j)
-    nsec += (__force u64)kcpustat_cpu(j).cpustat[CPUTIME_IDLE];
+        nsec += (__force u64)kcpustat_cpu(j).cpustat[CPUTIME_IDLE];
 
     get_monotonic_boottime(&uptime);
     idle.tv_sec = div_u64_rem(nsec, NSEC_PER_SEC, &rem);
@@ -146,40 +112,36 @@ static void *seq_next(struct seq_file *m, void *v, loff_t *pos)
 
 static void seq_stop(struct seq_file *s, void *v)
 {
-
 }
 
-/* This structure gather "function" to manage the sequence */
 static struct seq_operations my_seq_ops =
-{
-    .start = seq_start,
-    .next = seq_next,
-    .stop = seq_stop,
-    .show = show_cpu_info,
+    {
+        .start = seq_start,
+        .next = seq_next,
+        .stop = seq_stop,
+        .show = show_cpu_info,
 };
 
-/* This function is called when the /proc file is open. */
 static int my_open(struct inode *inode, struct file *file)
 {
     return seq_open(file, &my_seq_ops);
 };
 
-/* This structure gather "function" that manage the /proc file */
 #ifdef HAVE_PROC_OPS
 static const struct proc_ops file_ops =
-{
-    .proc_open = my_open,
-    .proc_read = seq_read,
-    .proc_lseek = seq_lseek,
-    .proc_release = seq_release,
+    {
+        .proc_open = my_open,
+        .proc_read = seq_read,
+        .proc_lseek = seq_lseek,
+        .proc_release = seq_release,
 };
 #else
 static const struct file_operations file_ops =
-{
-    .open = my_open,
-    .read = seq_read,
-    .llseek = seq_lseek,
-    .release = seq_release,
+    {
+        .open = my_open,
+        .read = seq_read,
+        .llseek = seq_lseek,
+        .release = seq_release,
 };
 #endif
 
