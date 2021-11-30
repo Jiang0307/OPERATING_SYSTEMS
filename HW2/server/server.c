@@ -69,6 +69,7 @@ void* thread_handler(void* arg)
                 {
                     strcat(return_to_client,"[ERROR] Wrong command format\n");
                 }
+
                 else
                 {
                     //printf("\nSET state\n");
@@ -76,19 +77,28 @@ void* thread_handler(void* arg)
                     strcat(filename,key);
                     strcat(filename,".KEY_FILE");
 
-                    pthread_mutex_lock(&mutex);
-                    FILE* file_pointer = NULL;
-                    file_pointer = fopen(filename, "w");
-                    fprintf(file_pointer, "%s", value );
-                    fclose(file_pointer);
-                    //sleep(5);
-                    pthread_mutex_unlock(&mutex);
+                    pthread_mutex_lock(&mutex); //LOCK
+                    if( check_file_exists(filename) == 1 ) //key already exist
+                    {
+                        //sleep(5);
+                        pthread_mutex_unlock(&mutex); //UNLOCK
+                        strcat(return_to_client,"[ERROR] Key already exist!\n");
+                    }
+                    else    							 //key does not exist
+                    {
+                        FILE* file_pointer = NULL;
+                        file_pointer = fopen(filename, "w");
+                        fprintf(file_pointer, "%s", value );
+                        fclose(file_pointer);
+                        //sleep(5);
+                        pthread_mutex_unlock(&mutex);
 
-                    strcat(return_to_client,"[OK] Key-value pair (");
-                    strcat(return_to_client,key);
-                    strcat(return_to_client,",");
-                    strcat(return_to_client,value);
-                    strcat(return_to_client,") is stored!\n");
+                        strcat(return_to_client,"[OK] Key-value pair (");
+                        strcat(return_to_client,key);
+                        strcat(return_to_client,",");
+                        strcat(return_to_client,value);
+                        strcat(return_to_client,") is stored!\n");
+                    }
                 }
             }
             else if(command[0]=='G' && command[1]=='E' && command[2]=='T')
@@ -105,7 +115,7 @@ void* thread_handler(void* arg)
                     strcat(filename,".KEY_FILE");
 
                     pthread_mutex_lock(&mutex); //LOCK
-                    if( check_file_exists(filename)==0 )
+                    if( check_file_exists(filename) == 0 )
                     {
                         //sleep(5);
                         pthread_mutex_unlock(&mutex); //UNLOCK
@@ -142,7 +152,7 @@ void* thread_handler(void* arg)
                     strcat(filename,".KEY_FILE");
 
                     pthread_mutex_lock(&mutex); //LOCK
-                    if( check_file_exists(filename)==0 )
+                    if( check_file_exists(filename) == 0 )
                     {
                         //sleep(5);
                         pthread_mutex_unlock(&mutex); //UNLOCK
