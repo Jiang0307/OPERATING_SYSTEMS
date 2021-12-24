@@ -115,7 +115,7 @@ static void seq_stop(struct seq_file *s, void *v)
 }
 
 static struct seq_operations my_seq_ops =
-    {
+{
         .start = seq_start,
         .next = seq_next,
         .stop = seq_stop,

@@ -72,8 +72,8 @@ int main(int argc, char **argv)
         send(clientfd,input_line, SIZE,0);
         recv(clientfd,return_from_server,SIZE,0);
         printf("%s",return_from_server);
-        free(server_port);
-        free(server_host_name);
     }
+    free(server_port);
+    free(server_host_name);
     return 0;
 }
