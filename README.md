@@ -1,2 +1,2 @@
-# Operating_Systems
+# OPERATING_SYSTEMS
 Homeworks of the course
